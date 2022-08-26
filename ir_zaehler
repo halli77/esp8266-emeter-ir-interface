@@ -1,0 +1,59 @@
+// v100
+
+#define INPUT_PIN 5  // Define Pin GPIO5 (=D1) as input pin
+
+const TICKS_PER_KWH = 10000;
+
+const unsigned long INTERVAL = 1000L*60* 0.5; // 5 Minuten
+unsigned long lastRun = 0; 
+
+
+const char* ssid     = "xxx";
+const char* password = "xxx";
+
+int zaehler = 0;
+int messung = 0;
+
+
+
+void setup() {
+  Serial.begin(9600);
+  Serial.flush();
+  Serial.println("=== Start ===");
+  
+  attachInterrupt(digitalPinToInterrupt(INPUT_PIN), handleInterruptD05, FALLING);
+
+  pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
+  digitalWrite(LED_BUILTIN, HIGH); // LED ausschalten
+}
+
+
+
+ICACHE_RAM_ATTR void handleInterruptD05() {
+  zaehler = zaehler + 1;
+  Serial.print("Zähler: ");
+  Serial.println (zaehler);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(50); 
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(50);  
+}
+
+
+void sendValues() {
+  Serial.print("SUMME: ");
+  Serial.println (zaehler);
+  zaehler = 0;
+  
+}
+
+
+
+// the loop function runs over and over again forever
+void loop() {
+  if ( millis() - lastRun >= INTERVAL ) {
+    sendValues();
+    lastRun += INTERVAL;
+ }
+     
+}
